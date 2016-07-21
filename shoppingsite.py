@@ -51,7 +51,6 @@ def show_melon(melon_id):
     """
 
     melon = melons.get_by_id(melon_id)
-    print melon
     return render_template("melon_details.html",
                            display_melon=melon)
 
@@ -70,8 +69,14 @@ def shopping_cart():
     #   - keep track of the total amt ordered for a melon-type
     #   - keep track of the total amt of the entire order
     # - hand to the template the total order cost and the list of melon types
+    melon_list = session['cart_items']
+    melon_count_dict = {}
+    for melon in melon_list:
+        melon_count_dict[melon] = melon_count_dict.get(melon, 0) + 1
 
-    return render_template("cart.html")
+    print melon_count_dict
+
+    return render_template("cart.html",melons=melon_list)
 
 
 @app.route("/add_to_cart/<int:id>")
@@ -86,11 +91,10 @@ def add_to_cart(id):
     session.setdefault('cart_items', []).append(id)
 
     melon = melons.get_by_id(id)
-    print session['cart_items']
 
     #Flash a message indicating the melon was successfully added to the cart.
-    flash(melon.common_name + " was added to cart.")
-    return render_template("cart.html")
+    flash(melon.common_name + " was added to cart")
+    return redirect("/cart")
 
 
 @app.route("/login", methods=["GET"])
