@@ -3,7 +3,26 @@
 
 {% block body %}
 
-
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Melon Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for melon, item in melons.items() %}
+            <tr>
+                <td>{{ item['melon_name'] }}</td>
+                <td>{{ item['qty'] }}</td>
+                <td>${{ "%0.2f" % item['melon_price'] }}</td>
+                <td>${{ "%0.2f" % item['total_per_type'] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
     <h3>Total: {{ order_total }}</h3>
 
     <a href="/checkout" class="btn btn-large btn-primary">Check Out</a>

@@ -59,39 +59,28 @@ def show_melon(melon_id):
 def shopping_cart():
     """Display content of shopping cart."""
 
-    # TODO: Display the contents of the shopping cart.
-
-    # The logic here will be something like:
-    #
-    # - get the list-of-ids-of-melons from the session cart
-    # - loop over this list:
-    #   - keep track of information about melon types in the cart
-    #   - keep track of the total amt ordered for a melon-type
-    #   - keep track of the total amt of the entire order
-    # - hand to the template the total order cost and the list of melon types
+    # get the list-of-ids-of-melons from the session cart
     melon_list = session['cart_items']
-    melon_count_dict = {}
+    melon_counts = {}
     order_total = 0
-    for melon_id in melon_list:
+
+    # using set() reduces number of loops:
+    for melon_id in set(melon_list):
+
         # grabbing the melon object based on id stored in session
         melon = melons.get_by_id(melon_id)
+        qty = melon_list.count(melon_id)
+        total = qty * melon.price
+        order_total += total
+
         # creating an entry in the dictionary for each melon, with id as key
-        # and storing another dictionary of attributes for that melon
-        # setdefault ensures that it only happens once
-        melon_count_dict.setdefault(melon_id, {'melon_name': melon.common_name,
+        melon_counts[melon_id] = {'melon_name': melon.common_name,
                                                'melon_price': melon.price,
-                                               'total_per_type': 0,
-                                              })
+                                               'qty': qty,
+                                               'total_per_type': total,
+                                              }
 
-                 
-        melon_count_dict[melon_id]['qty'] = melon_count_dict[melon_id].get('qty', 0) + 1
-        melon_count_dict[melon_id]['total_per_type'] = float(melon_count_dict[melon_id]['qty']) * melon_count_dict[melon_id]['melon_price']
-    
-    for melon_id in melon_count_dict:
-        order_total += melon_count_dict[melon_id]['total_per_type']
-
-    # return render_template('cart.html', melon_dict=melon_count_dict, order_total=order_total)   
-    return render_template("cart.html", order_total=order_total)
+    return render_template("cart.html", melons=melon_counts, order_total=order_total)
 
 @app.route("/add_to_cart/<int:id>")
 def add_to_cart(id):
@@ -103,7 +92,6 @@ def add_to_cart(id):
 
     # - add the id of the melon they bought to the cart in the session
     session.setdefault('cart_items', []).append(id)
-
     melon = melons.get_by_id(id)
 
     #Flash a message indicating the melon was successfully added to the cart.
